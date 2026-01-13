@@ -2,10 +2,10 @@
 
 ## 🚀 How to Run
 Now you can simply use:
-* Setup: make setup (Installs venv and dependencies)
-* Run: make run (Runs the migration tool)
-* Demo: make demo (Runs in demo mode)
-* Clean: make clean (Removes temporary files)
+* Setup: `make setup` (Installs venv and dependencies)
+* Run: `make run` (Runs the migration tool)
+* Demo: `make demo` (Runs in demo mode)
+* Clean: `make clean` (Removes temporary files)
 
 ## Test COBOL Code
 
