@@ -1,9 +1,17 @@
 import os
 from crewai import Agent, Task, Crew, Process
-from crewai_tools import Tool
+from crewai.tools import Tool
+# from crewai.agent import CacheHandler, RPMController
+# from crewai.callbacks import ToolsHandler
+# from crewai.runnables.config import RunnableConfig
+# from typing import List, Any, Optional
+# from tree_sitter import Language, Parser
+from ast_extractor import extract_function_metadata
 
-# 配置 LLM（建议使用 Claude 3.5 或 GPT-4o 以获得最佳代码解析效果）
-os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY"
+# 配置 LLM（建议使用 Claude 3.5 或 GPT-4o, Gemini 3 pro 以获得最佳代码解析效果）
+# os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY_HERE" # Security: Read from env instead
+if not os.environ.get("OPENAI_API_KEY"):
+    print("Warning: OPENAI_API_KEY is not set in the environment.")
 
 # 封装成 CrewAI 工具
 ast_tool = Tool(
@@ -30,3 +38,36 @@ architect = Agent(
     verbose=True,
     allow_delegation=False
 )
+
+# 假设我们要解析的旧代码片段
+legacy_code_snippet = """
+double calc_v1(int a, char* b, float c) {
+    // 2005年写的陈旧逻辑
+    if (strcmp(b, "discount") == 0) return a * c * 0.8;
+    return a * c;
+}
+"""
+
+# 任务 1: 逻辑提取
+task_analysis = Task(
+    description=f"Analyze the following legacy code and list all inputs, outputs, and the core logic: {legacy_code_snippet}",
+    expected_output="A structured report covering function names, parameters (types & meaning), and business rules.",
+    agent=archaeologist
+)
+
+# 任务 2: 代码生成
+task_generation = Task(
+    description="Based on the archaeologist's report, generate a full Python FastAPI script and a corresponding openapi.yaml file.",
+    expected_output="A complete FastAPI Python script that wraps the logic, including Pydantic models and API documentation.",
+    agent=architect
+)
+
+# 启动 Crew
+legacy_modernizer_crew = Crew(
+    agents=[archaeologist, architect],
+    tasks=[task_analysis, task_generation],
+    process=Process.sequential # 顺序执行：先分析，后生成
+)
+
+result = legacy_modernizer_crew.kickoff()
+print(result)
