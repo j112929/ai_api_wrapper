@@ -1,5 +1,10 @@
 import argparse
 import time
+from dotenv import load_dotenv
+
+# Load config
+load_dotenv()
+
 from core.reporting import ReportGenerator
 from core.parser import LegacyParser
 from core.architect import CodeArchitect
